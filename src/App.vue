@@ -25,6 +25,7 @@
     flex: 1 1 50%;
   }
   .container {
+    position: relative;
     background-color: #5B5C5F;
     width: 700px;
     height: 600px;
