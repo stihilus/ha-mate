@@ -14,7 +14,34 @@
         <hr>
 
         <div class="formula">
-            X2 = X1 ( 1 - X1 ) * a
+            <span>X2 = X1 ( 1 - X1 ) * a</span>
+
+            <div>
+                <div class="nav-button graph" @click="shown='graph'">
+                    <div id="chart-mini"></div>
+                    <div class="subtitle">Seed</div>
+                </div>
+                <div class="nav-button drums" @click="shown='drums'">
+                    <div class="mini-sequence" v-for="instr in ['kick', 'snare', 'clap', 'hihatClosed', 'hihatOpen']">
+                    <span
+                            v-for="i in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]"
+                            class="col"
+                            v-bind:class="{ filled: sequence[instr][i] }"
+                    ></span>
+                    </div>
+                    <div class="subtitle">Drums</div>
+                </div>
+                <div class="nav-button melody" @click="shown='melody'">
+                    <div class="mini-sequence" v-for="note in ['A', 'B', 'C', 'D', 'E']">
+                    <span
+                            v-for="i in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]"
+                            class="col"
+                            v-bind:class="{ filled: sequence.synth[note][i] }"
+                    ></span>
+                    </div>
+                    <div class="subtitle">Melody</div>
+                </div>
+            </div>
         </div>
 
         <div v-show="shown === 'graph'">
@@ -23,13 +50,13 @@
                         class="chart"
                         id="chart-left"
                         v-bind:class="{ active: selectedChart === 'left' }"
-                        @click='selectedChart = "left"'
+                        @click="selectChart('left')"
                 ></div>
                 <div
                         class="chart"
                         id="chart-right"
                         v-bind:class="{ active: selectedChart === 'right' }"
-                        @click="selectedChart = 'right'"
+                        @click="selectChart('right')"
                 ></div>
             </div>
             <div class="flex pointers-wrapper">
@@ -42,16 +69,14 @@
             </div>
             <div class="flex">
                 <input type="range" min="0" max="49" step="1" id="point-left" v-model="pointLeft"
-                       @mousedown="selectedChart = 'left'" @touchstart="selectedChart = 'left'">
+                       @mousedown="selectChart('left')" @touchstart="selectChart('left')">
                 <input type="range" min="0" max="49" step="1" id="point-right" v-model="pointRight"
-                       @mousedown="selectedChart = 'right'" @touchstart="selectedChart = 'right'">
+                       @mousedown="selectChart('right')" @touchstart="selectChart('right')">
             </div>
         </div>
 
         <div v-show="shown === 'drums'">
-            <div class="sequence">
-                <div>Tempo: 90 bpm</div> <!-- TODO -->
-            </div>
+            <div class="sequence"></div>
             <div class="sequence drums" v-for="instr in ['kick', 'snare', 'clap', 'hihatClosed', 'hihatOpen']">
                 <div>{{ instr }}</div>
                 <span
@@ -70,15 +95,13 @@
 
 
         <div v-show="shown === 'melody'">
-            <div class="sequence">
-                <div>Tempo: 90 bpm</div>
-            </div>
-            <div class="sequence melody" v-for="instr in ['kick', 'snare', 'clap', 'hihatClosed', 'hihatOpen']">
-                <div>{{ instr }}</div>
+            <div class="sequence"></div>
+            <div class="sequence melody" v-for="note in ['A', 'B', 'C', 'D', 'E']">
+                <div>{{ note }}</div>
                 <span
                         v-for="i in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]"
                         class="col"
-                        v-bind:class="{ active: currentCol === i, filled: sequence[instr][i] }"
+                        v-bind:class="{ active: currentCol === i, filled: sequence.synth[note][i] }"
                 ></span>
             </div>
             <div class="sequence-margin">
@@ -90,11 +113,11 @@
         </div>
 
         <div class="function-output">{{ final }}</div>
-        <div class="toggles">
-            <button class="graph" v-bind:class="{ active: shown === 'graph' }" @click="shown='graph'">Graph</button>
-            <button class="drums" v-bind:class="{ active: shown === 'drums' }" @click="shown='drums'">Drums</button>
-            <button class="melody" v-bind:class="{ active: shown === 'melody' }" @click="shown='melody'">Melody</button>
-        </div>
+        <!--<div class="toggles">-->
+        <!--<button class="graph" v-bind:class="{ active: shown === 'graph' }" @click="shown='graph'">Graph</button>-->
+        <!--<button class="drums" v-bind:class="{ active: shown === 'drums' }" @click="shown='drums'">Drums</button>-->
+        <!--<button class="melody" v-bind:class="{ active: shown === 'melody' }" @click="shown='melody'">Melody</button>-->
+        <!--</div>-->
     </div>
 </template>
 
@@ -116,6 +139,23 @@
       showGrid: false,
       showLabel: false,
       line: '#606165',
+    }
+  };
+
+  const miniChartOpts = {
+    showPoint: false,
+    chartPadding: 0,
+    fullWidth: true,
+    axisX: {
+      offset: 0,
+      showGrid: false,
+      showLabel: false
+    },
+    axisY: {
+      offset: 0,
+      showGrid: false,
+      showLabel: false,
+      line: '#fff',
     }
   };
 
@@ -164,6 +204,12 @@
 
         new Chartist.Line('#chart-left', { series: [pointsLeft] }, chartOpts);
         new Chartist.Line('#chart-right', { series: [pointsRight] }, chartOpts);
+        new Chartist.Line('#chart-mini', { series: [this.selectedChart === 'left' ? pointsLeft : pointsRight] }, miniChartOpts);
+
+      },
+      selectChart(chart) {
+        this.selectedChart = chart;
+        new Chartist.Line('#chart-mini', { series: [chart === 'left' ? this.pointsLeft : this.pointsRight] }, miniChartOpts);
       },
       keyPress(key) {
         if (key === 'c') {
@@ -273,6 +319,9 @@
         font-size: 14px;
         text-align: left;
         padding: 15px 20px 20px;
+        justify-content: space-between;
+        display: flex;
+        align-items: center;
     }
 
     .charts-wrapper {
@@ -281,7 +330,7 @@
     }
 
     .chart {
-        height: 240px;
+        height: 200px;
         width: 350px;
         background-color: #A1A1A1;
         cursor: pointer;
@@ -299,16 +348,25 @@
         stroke-width: 1px;
     }
 
+    #chart-mini {
+        width: 80px;
+        height: 25px;
+        .ct-series-a .ct-line {
+            stroke: white !important;
+            stroke-width: 1px;
+        }
+    }
+
     .pointers-wrapper {
         pointer-events: none;
         .pointer-wrapper {
             position: relative;
             .pointer {
                 position: absolute;
-                height: 240px;
+                height: 200px;
                 width: 1px;
                 background: rgba(#48494F, .3);
-                top: -240px;
+                top: -200px;
             }
         }
     }
@@ -396,6 +454,58 @@
             }
             &.melody {
                 background-color: #219653;
+            }
+        }
+    }
+
+    .nav-button {
+        padding: 5px;
+        display: inline-block;
+        border-radius: 5px;
+        text-align: center;
+        color: white;
+        font-size: 10px;
+        text-transform: lowercase;
+        margin: 0 5px;
+        border: 1px solid;
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+        position: relative;
+        &:hover {
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+        &:active {
+            bottom: -2px;
+        }
+
+        &.graph {
+            background-color: #2F80ED;
+            border-color: darken(#2F80ED, 20%);
+        }
+        &.drums {
+            background-color: #F9C02C;
+            border-color: darken(#F9C02C, 20%);
+        }
+        &.melody {
+            background-color: #219653;
+            border-color: darken(#219653, 10%);
+        }
+
+        .subtitle {
+            margin-top: 3px;
+        }
+
+        .mini-sequence {
+            display: flex;
+            span {
+                flex: 1 1 auto;
+                display: inline-block;
+                height: 3px;
+                width: 3px;
+                margin: 1px;
+                border-radius: 1px;
+                &.filled {
+                    background-color: white;
+                }
             }
         }
     }

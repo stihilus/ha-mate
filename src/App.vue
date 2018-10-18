@@ -1,11 +1,20 @@
 <template>
   <div id="app">
-    <router-view/>
+    <router-view />
   </div>
 </template>
 
 <style lang="scss">
-  html, body { height: 100%; }
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  * {
+    user-select: none;
+  }
+
   body {
     background-color: #C6C2B8;
     font-family: 'Roboto', sans-serif;
@@ -18,12 +27,15 @@
     flex-direction: column;
     justify-content: center;
   }
+
   .flex {
-      display: flex;
+    display: flex;
   }
+
   .flex * {
     flex: 1 1 50%;
   }
+
   .container {
     position: relative;
     background-color: #5B5C5F;
