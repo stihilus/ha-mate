@@ -8,6 +8,7 @@ export default (seed) => {
   ];
   if (Number.isNaN(Number(seed))) {
     return {
+      tempo: 90,
       kick: [],
       snare: [],
       clap: [],
@@ -34,7 +35,9 @@ export default (seed) => {
     D: kickSeqs[Math.floor(seed.substr(10, 1) / 2)],
     E: kickSeqs[Math.floor(seed.substr(11, 1) / 2)],
   };
+  const tempo = Math.floor(30 + 2.1 * seed.substr(2, 2));
   return {
+    tempo,
     kick,
     snare,
     clap,

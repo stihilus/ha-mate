@@ -14,7 +14,7 @@
     <hr>
 
     <div class="formula">
-      <span>X2 = X1 ( 1 - X1 ) * a</span>
+      <span></span>
 
       <div>
         <div class="nav-button graph" @click="shown='graph'">
@@ -51,6 +51,16 @@
     </div>
 
     <div v-show="shown === 'graph'">
+      <div class="charts-formula-wrapper">
+        <div>
+          <span>normal</span>
+          <span>x<sub>2</sub> = x<sub>1</sub> · (1 - x<sub>1</sub>) · 1.7</span>
+        </div>
+        <div>
+          <span>haos</span>
+          <span>x<sub>2</sub> = x<sub>1</sub> · (1 - x<sub>1</sub>) · 3.78</span>
+        </div>
+      </div>
       <div class="charts-wrapper">
         <div
           class="chart"
@@ -82,7 +92,11 @@
     </div>
 
     <div v-show="shown === 'drums'">
-      <div class="sequence"></div>
+      <div class="sequence">
+        <div>
+          {{ sequence.tempo }} bpm
+        </div>
+      </div>
       <div
         class="sequence drums"
         v-for="instr in ['kick', 'snare', 'clap', 'hihatClosed', 'hihatOpen']"
@@ -107,7 +121,14 @@
 
 
     <div v-show="shown === 'melody'">
-      <div class="sequence"></div>
+      <div class="sequence">
+        <div>
+          {{ sequence.tempo }} bpm
+        </div>
+        <div>
+          Skala
+        </div>
+      </div>
       <div class="sequence melody" v-for="note in ['A', 'B', 'C', 'D', 'E']" :key="note">
         <div>{{ note }}</div>
         <span
@@ -195,7 +216,9 @@
         return parseFloat(this.selectedChart === 'left' ? this.finalLeft : this.finalRight).toFixed(10);
       },
       sequence() {
-        return getSequence(this.final);
+        const seq = getSequence(this.final);
+        Tone.Transport.bpm.value = seq.tempo;
+        return seq;
       },
     },
     methods: {
@@ -331,7 +354,7 @@
   .formula {
     font-size: 14px;
     text-align: left;
-    padding: 15px 20px 20px;
+    padding: 15px 10px 22px 20px;
     justify-content: space-between;
     display: flex;
     align-items: center;
@@ -342,7 +365,24 @@
     border: 1px solid #505155;
   }
 
+  .charts-formula-wrapper {
+    display: flex;
+    position: absolute;
+    width: 100%;
+    > div {
+      display: flex;
+      flex: 1 1 100%;
+      justify-content: space-between;
+      padding: 15px;
+      color: #606165;
+    }
+    .math {
+      font-family: serif;
+    }
+  }
+
   .chart {
+    padding-top: 40px;
     height: 200px;
     width: 350px;
     background-color: #A1A1A1;
@@ -393,19 +433,26 @@
       border-bottom: 1px solid #AEAEAF;
     }
     div {
-      width: 100px;
       text-align: left;
       border-right: 1px solid #AEAEAF;
       line-height: 38px;
       padding: 0 10px;
       font-size: 12px;
       color: #595A5D;
+      width: 100%;
+      &:first-child {
+        width: 100px;
+        min-width: 100px;
+      }
     }
     span {
       flex: 1 1 auto;
       border-right: 1px solid #AEAEAF;
       display: inline-block;
       height: 38px;
+    }
+    span.active {
+      background-color: #D7D7D7;
     }
     &.drums span.filled {
       background-color: #EEB72A;
@@ -479,7 +526,7 @@
     color: white;
     font-size: 10px;
     text-transform: lowercase;
-    margin: 0 5px;
+    margin: 0 9px;
     border: 1px solid;
     box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
     position: relative;
