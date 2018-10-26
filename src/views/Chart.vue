@@ -37,12 +37,12 @@
           <div class="subtitle">Drums</div>
         </div>
         <div class="nav-button melody" @click="shown='melody'">
-          <div class="mini-sequence" v-for="note in ['A', 'B', 'C', 'D', 'E']" :key="note">
+          <div class="mini-sequence" v-for="note in sequence.scale" :key="note">
                     <span
                       v-for="i in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]"
                       :key="i"
                       class="col"
-                      v-bind:class="{ filled: sequence.synth[note][i] }"
+                      v-bind:class="{ filled: sequence.synthSeq[note][i] }"
                     ></span>
           </div>
           <div class="subtitle">Melody</div>
@@ -129,13 +129,13 @@
           Skala
         </div>
       </div>
-      <div class="sequence melody" v-for="note in ['A', 'B', 'C', 'D', 'E']" :key="note">
+      <div class="sequence melody" v-for="note in sequence.scale" :key="note">
         <div>{{ note }}</div>
         <span
           v-for="i in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]"
           :key="i"
           class="col"
-          v-bind:class="{ active: currentCol === i, filled: sequence.synth[note][i] }"
+          v-bind:class="{ active: currentCol === i, filled: sequence.synthSeq[note][i] }"
         ></span>
       </div>
       <div class="sequence-margin">
@@ -161,6 +161,8 @@
   import getSequence from '../sequence';
 
   const chartOpts = {
+    height: 200,
+    width: 350,
     showPoint: false,
     chartPadding: 10,
     fullWidth: true,
@@ -266,9 +268,28 @@
         hihatClosed: '/sounds/hihat-closed.wav',
         hihatOpen: '/sounds/hihat-open.wav',
       }, {
-        // "volume" : -10,
+        "volume" : -20,
         // "fadeOut" : "64n",
       }).toMaster();
+
+      const synth = new Tone.Synth({
+        "oscillator" : {
+          "type" : "amtriangle",
+          "harmonicity" : 0.5,
+          "modulationType" : "sine"
+        },
+        "envelope" : {
+          "attackCurve" : 'exponential',
+          "attack" : 0.05,
+          "decay" : 0.1,
+          "sustain" : 0.1,
+          "release" : 0.1,
+        },
+        "portamento" : 0.05
+      }).toMaster();
+
+      window.synth = synth;
+      window.transport = Tone.Transport;
 
       const that = this;
 
@@ -277,6 +298,9 @@
         that.currentCol = col;
         ['kick', 'snare', 'clap', 'hihatClosed', 'hihatOpen'].forEach((instr) => {
           if (that.sequence[instr] && that.sequence[instr][col]) keys.get(instr).start();
+        });
+        that.sequence.scale.forEach((note) => {
+          if (that.sequence.synthSeq[note] && that.sequence.synthSeq[note][col]) synth.triggerAttackRelease(note + "3", "1n");
         });
       }, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], '16n');
 
