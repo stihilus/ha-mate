@@ -89,10 +89,10 @@
       </div>
       <div class="flex pointers-wrapper">
         <div class="pointer-wrapper">
-          <div class="pointer" v-bind:style="{ left: (6.73 * pointLeft) + 9.5 + 'px' }"></div>
+          <div class="pointer" v-bind:style="{ left: (7.75 * pointLeft) + 11 + 'px' }"></div>
         </div>
         <div class="pointer-wrapper">
-          <div class="pointer" v-bind:style="{ left: (6.73 * pointRight) + 9.5 + 'px' }"></div>
+          <div class="pointer" v-bind:style="{ left: (7.75 * pointRight) + 11 + 'px' }"></div>
         </div>
       </div>
       <div class="flex">
@@ -237,7 +237,7 @@
 
   export default {
     data: () => ({
-      startingPoint: '0.46091',
+      startingPoint: '0.' + (new Date()).getHours() + '' + (new Date()).getMinutes(),
       pointLeft: 49,
       pointRight: 17,
       pointsLeft: [],
@@ -245,6 +245,7 @@
       selectedChart: 'right',
       currentCol: 0,
       shown: 'graph',
+      timeout: null,
     }),
     computed: {
       finalLeft() {
@@ -257,8 +258,10 @@
         return parseFloat(this.selectedChart === 'left' ? this.finalLeft : this.finalRight).toFixed(10);
       },
       sequence() {
+        this.resetTimeout();
         const seq = getSequence(this.final);
         Tone.Transport.bpm.value = seq.tempo;
+        if (Tone.Transport.state !== "started") Tone.Transport.start();
         return seq;
       },
     },
@@ -297,6 +300,24 @@
         }
         this.draw();
       },
+      resetTimeout() {
+        clearTimeout(this.timeout);
+        this.timeout = setTimeout(this.fadeOut, 30 * 1000);
+      },
+      fadeOut() {
+        const bpm = transport.bpm.value;
+        if (bpm > 10) {
+          const newBpm = Math.floor(bpm / 2);
+          transport.bpm.value = newBpm;
+          const that = this;
+          setTimeout(() => {
+            if (Math.round(transport.bpm.value) === newBpm) // cancel fade out if sound changed
+              that.fadeOut();
+          }, 1000);
+        } else {
+          transport.stop();
+        }
+      }
     },
     mounted() {
       this.draw();
