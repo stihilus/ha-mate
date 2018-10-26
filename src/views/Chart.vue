@@ -13,9 +13,8 @@
     </div>
     <hr>
 
-    <div class="formula">
-      <span></span>
-
+    <div class="navigation">
+      <div v-show="selectedChart === 'right'"></div>
       <div>
         <div class="nav-button graph" @click="shown='graph'">
           <div id="chart-mini"></div>
@@ -47,7 +46,20 @@
           </div>
           <div class="subtitle">Melody</div>
         </div>
+        <div class="nav-button melody" @click="shown='bass'">
+          <div class="mini-sequence" v-for="note in sequence.scale" :key="note">
+                    <span
+                      v-for="i in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]"
+                      :key="i"
+                      class="col"
+                      v-bind:class="{ filled: sequence.bassSeq[note][i] }"
+                    ></span>
+          </div>
+          <div class="subtitle">Bass</div>
+        </div>
       </div>
+
+      <div v-show="selectedChart === 'left'"></div>
     </div>
 
     <div v-show="shown === 'graph'">
@@ -147,6 +159,33 @@
       </div>
     </div>
 
+    <div v-show="shown === 'bass'">
+      <div class="sequence">
+        <div>
+          {{ sequence.tempo }} bpm
+        </div>
+        <div>
+          Skala
+        </div>
+      </div>
+      <div class="sequence melody" v-for="note in sequence.scale" :key="note">
+        <div>{{ note }}</div>
+        <span
+          v-for="i in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]"
+          :key="i"
+          class="col"
+          v-bind:class="{ active: currentCol === i, filled: sequence.bassSeq[note][i] }"
+        ></span>
+      </div>
+      <div class="sequence-margin">
+        <span
+          v-for="i in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]"
+          :key="i"
+          class="col"
+        >{{i}}</span>
+      </div>
+    </div>
+
     <div class="function-output">{{ final }}</div>
     <!--<div class="toggles">-->
     <!--<button class="graph" v-bind:class="{ active: shown === 'graph' }" @click="shown='graph'">Graph</button>-->
@@ -162,7 +201,7 @@
 
   const chartOpts = {
     height: 200,
-    width: 350,
+    width: 400,
     showPoint: false,
     chartPadding: 10,
     fullWidth: true,
@@ -272,20 +311,14 @@
         // "fadeOut" : "64n",
       }).toMaster();
 
-      const synth = new Tone.Synth({
+      const synth = new Tone.PolySynth(5, Tone.Synth).toMaster();
+
+      const bass = new Tone.Synth({
         "oscillator" : {
           "type" : "amtriangle",
           "harmonicity" : 0.5,
           "modulationType" : "sine"
         },
-        "envelope" : {
-          "attackCurve" : 'exponential',
-          "attack" : 0.05,
-          "decay" : 0.1,
-          "sustain" : 0.1,
-          "release" : 0.1,
-        },
-        "portamento" : 0.05
       }).toMaster();
 
       window.synth = synth;
@@ -299,8 +332,13 @@
         ['kick', 'snare', 'clap', 'hihatClosed', 'hihatOpen'].forEach((instr) => {
           if (that.sequence[instr] && that.sequence[instr][col]) keys.get(instr).start();
         });
+        const melodyNotes = [];
         that.sequence.scale.forEach((note) => {
-          if (that.sequence.synthSeq[note] && that.sequence.synthSeq[note][col]) synth.triggerAttackRelease(note + "3", "1n");
+          if (that.sequence.synthSeq[note] && that.sequence.synthSeq[note][col]) melodyNotes.push(note + "3");
+        });
+        synth.triggerAttackRelease(melodyNotes, "16n");
+        that.sequence.scale.forEach((note) => {
+          if (that.sequence.bassSeq[note] && that.sequence.bassSeq[note][col]) bass.triggerAttackRelease(note + "2", "4n");
         });
       }, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], '16n');
 
@@ -348,7 +386,7 @@
 
   .keys {
     display: flex;
-    justify-content: space-evenly;
+    justify-content: flex-end;
     padding: 15px 0;
     .key {
       width: 43px;
@@ -363,6 +401,10 @@
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
       position: relative;
       cursor: pointer;
+      margin-left: 20px;
+      &:last-child {
+        margin-right: 25px;
+      }
       &.clear {
         background: radial-gradient(21.50px at 50% 50%, #BF0A14 0%, #C30D17 100%);
       }
@@ -375,10 +417,8 @@
     }
   }
 
-  .formula {
-    font-size: 14px;
-    text-align: left;
-    padding: 15px 10px 22px 20px;
+  .navigation {
+    padding: 15px 10px 22px;
     justify-content: space-between;
     display: flex;
     align-items: center;
@@ -408,7 +448,7 @@
   .chart {
     padding-top: 40px;
     height: 200px;
-    width: 350px;
+    width: 400px;
     background-color: #A1A1A1;
     cursor: pointer;
     &.active {
@@ -426,8 +466,8 @@
   }
 
   #chart-mini {
-    width: 80px;
-    height: 25px;
+    width: 66px;
+    height: 21px;
     .ct-series-a .ct-line {
       stroke: white !important;
       stroke-width: 1px;
@@ -585,7 +625,7 @@
         display: inline-block;
         height: 3px;
         width: 3px;
-        margin: 1px;
+        margin: 0.5px;
         border-radius: 1px;
         &.filled {
           background-color: white;

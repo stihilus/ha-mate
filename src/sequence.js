@@ -51,18 +51,28 @@ export default (seed) => {
   const hihatClosed = kickSeqs[Math.floor(seed.substr(5, 1) / 2)];
   const hihatOpen = kickSeqs[Math.floor(seed.substr(6, 1) / 2)];
 
-  console.log(seed.substr(2, 1), Math.floor(seed.substr(2, 1) / 2))
   const scale = scales[Math.floor(seed.substr(2, 1) / 2)].slice(0, 5);
   const octaves = [
     1 + Math.floor(seed.substr(4, 1) / 5),
     1 + Math.floor(seed.substr(5, 1) / 5),
   ];
   const synthSeq = {};
-  console.log(scale)
   for (let i = 0; i < 5; i++) {
-    synthSeq[scale[i]] = synthSeqs[Math.floor(seed.substr(2 + i, 1))];
+    synthSeq[scale[i]] = synthSeqs[Math.floor(seed.substr(3 + i, 1))];
   }
-  console.log(synthSeq);
+
+  const bassSeq = {};
+  for (let i = 0; i < 5; i++) {
+    bassSeq[scale[i]] =[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+  }
+  const bassSequence = kickSeqs[Math.floor(seed.substr(3, 1) / 2)];
+  for (let i = 0; i < 16; i++) {
+    if (!bassSequence[i]) continue;
+    const digit = seed.substr(2 + (i % (seed.length - 2)), 1);
+    const note = scale[Math.floor(digit / 2)];
+    bassSeq[note][i] = 1;
+  }
+
   return {
     tempo,
     kick,
@@ -72,5 +82,6 @@ export default (seed) => {
     hihatOpen,
     synthSeq,
     scale,
+    bassSeq,
   };
 };

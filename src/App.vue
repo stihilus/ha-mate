@@ -39,7 +39,7 @@
   .container {
     position: relative;
     background-color: #5B5C5F;
-    width: 700px;
+    width: 800px;
     height: 600px;
     margin: auto;
     color: #A8ABA5;
