@@ -192,6 +192,8 @@
     <!--<button class="drums" v-bind:class="{ active: shown === 'drums' }" @click="shown='drums'">Drums</button>-->
     <!--<button class="melody" v-bind:class="{ active: shown === 'melody' }" @click="shown='melody'">Melody</button>-->
     <!--</div>-->
+    <div class="print-decoration"></div>
+    <a @click="print()" class="print"></a>
   </div>
 </template>
 
@@ -317,6 +319,14 @@
         } else {
           transport.stop();
         }
+      },
+      print() {
+        const printWindow = window.open('', '', 'left=0,top=0,width=800,height=900,toolbar=0,scrollbars=0,status=0');
+        printWindow.document.write('<div style="width: 315px; height: 1170px; border: 1px solid black;">test</div>');
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close();
       }
     },
     mounted() {
@@ -571,36 +581,38 @@
     }
   }
 
-  .toggles {
+  .print {
     position: absolute;
-    right: 100%;
-    bottom: 50px;
-    // display: flex;
-    // flex-direction: column;
-    button {
-      width: 60px;
-      border-radius: 5px 0 0 5px;
-      border: 0;
-      outline: none;
-      color: white;
-      padding: 10px 5px;
-      margin: 5px 0;
-      box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
-      cursor: pointer;
-      text-align: left;
-      &.active {
-        width: 45px;
-      }
-      &.graph {
-        background-color: #2F80ED;
-      }
-      &.drums {
-        background-color: #F9C02C;
-      }
-      &.melody {
-        background-color: #219653;
-      }
-    }
+    bottom: -20px;
+    right: 20px;
+    border-radius: 0 0 5px 5px;
+    border: 0;
+    outline: none;
+    color: white;
+    height: 20px;
+    width: 45px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    text-align: left;
+    background-color: #F9C02C;
+    background: linear-gradient(to bottom, #BB9022, #F9C02C);
+  }
+
+  .print-decoration {
+    position: absolute;
+    z-index: -1;
+    bottom: -50px;
+    right: 275px;
+    width: 230px;
+    border-radius: 0 0 5px 5px;
+    border: 0;
+    outline: none;
+    color: white;
+    height: 50px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    text-align: left;
+    background-color: white;
   }
 
   .nav-button {
