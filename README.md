@@ -1,4 +1,4 @@
-# ha-mate
+# sekvenca ostatka
 
 ## Project setup
 ```
