@@ -80,8 +80,8 @@
     },
     mounted () {
       this.draw()
-      // window.print()
-      // window.close()
+      window.print()
+      window.close()
     },
   }
 </script>

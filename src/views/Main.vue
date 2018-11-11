@@ -17,11 +17,11 @@
       <div class="navigation">
         <div v-show="selectedChart === 'right'"></div>
         <div>
-          <div class="nav-button graph" @click="shown='graph'">
+          <div class="nav-button graph" @click="show('graph')">
             <div id="chart-mini"></div>
             <div class="subtitle">Seed</div>
           </div>
-          <div class="nav-button drums" @click="shown='drums'">
+          <div class="nav-button drums" @click="show('drums')">
             <div
               class="mini-sequence"
               v-for="instr in ['kick', 'snare', 'clap', 'hihatClosed', 'hihatOpen']"
@@ -36,7 +36,7 @@
             </div>
             <div class="subtitle">Drums</div>
           </div>
-          <div class="nav-button melody" @click="shown='melody'">
+          <div class="nav-button melody" @click="show('melody')">
             <div class="mini-sequence" v-for="note in sequence.scale" :key="note">
                       <span
                         v-for="i in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]"
@@ -47,7 +47,7 @@
             </div>
             <div class="subtitle">Melody</div>
           </div>
-          <div class="nav-button melody" @click="shown='bass'">
+          <div class="nav-button melody" @click="show('bass')">
             <div class="mini-sequence" v-for="note in sequence.scale" :key="note">
                       <span
                         v-for="i in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]"
@@ -65,11 +65,11 @@
 
       <div v-show="shown === 'graph'">
         <div class="charts-formula-wrapper">
-          <div>
+          <div v-bind:class="{ active: selectedChart === 'left' }">
             <span>normal</span>
             <span>x<sub>2</sub> = x<sub>1</sub> · (1 - x<sub>1</sub>) · 1.7</span>
           </div>
-          <div>
+          <div v-bind:class="{ active: selectedChart === 'right' }">
             <span>haos</span>
             <span>x<sub>2</sub> = x<sub>1</sub> · (1 - x<sub>1</sub>) · 3.78</span>
           </div>
@@ -90,16 +90,18 @@
         </div>
         <div class="flex pointers-wrapper">
           <div class="pointer-wrapper">
-            <div class="pointer" v-bind:style="{ left: (7.33 * pointLeft) + 21 + 'px' }"></div>
+            <div class="pointer" v-bind:style="{ left: (7.37 * pointLeft) + 20 + 'px' }"></div>
           </div>
           <div class="pointer-wrapper">
-            <div class="pointer" v-bind:style="{ left: (7.33 * pointRight) + 21 + 'px' }"></div>
+            <div class="pointer" v-bind:style="{ left: (7.37 * pointRight) + 20 + 'px' }"></div>
           </div>
         </div>
-        <div class="flex">
+        <div class="flex point-sliders-wrapper">
           <input type="range" min="0" max="49" step="1" id="point-left" v-model="pointLeft"
+                 v-bind:class="{ active: selectedChart === 'left' }"
                  @mousedown="selectChart('left')" @touchstart="selectChart('left')">
           <input type="range" min="0" max="49" step="1" id="point-right" v-model="pointRight"
+                 v-bind:class="{ active: selectedChart === 'right' }"
                  @mousedown="selectChart('right')" @touchstart="selectChart('right')">
         </div>
       </div>
@@ -187,15 +189,16 @@
         </div>
       </div>
 
+      <div class="speaker-decoration"></div>
       <div class="function-output">{{ final }}</div>
       <!--<div class="toggles">-->
       <!--<button class="graph" v-bind:class="{ active: shown === 'graph' }" @click="shown='graph'">Graph</button>-->
       <!--<button class="drums" v-bind:class="{ active: shown === 'drums' }" @click="shown='drums'">Drums</button>-->
       <!--<button class="melody" v-bind:class="{ active: shown === 'melody' }" @click="shown='melody'">Melody</button>-->
       <!--</div>-->
-      <div class="print-decoration"></div>
       <a @click="print()" class="print"></a>
     </div>
+    <div @click="print()" class="print-decoration"></div>
   </div>
 </template>
 
@@ -264,7 +267,8 @@
       sequence() {
         this.resetTimeout();
         const seq = getSequence(this.final);
-        Tone.Transport.bpm.value = seq.tempo;
+        // Tone.Transport.bpm.value = seq.tempo;
+        Tone.Transport.bpm.rampTo(seq.tempo);
         if (Tone.Transport.state !== "started") Tone.Transport.start();
         return seq;
       },
@@ -317,10 +321,14 @@
           setTimeout(() => {
             if (Math.round(transport.bpm.value) === newBpm) // cancel fade out if sound changed
               that.fadeOut();
-          }, 1000);
+          }, 500);
         } else {
           transport.stop();
         }
+      },
+      show(type) {
+        this.shown = type;
+        this.resetTimeout()
       },
       print() {
         const printWindow = window.open(
@@ -361,6 +369,7 @@
 
       Tone.Transport.start();
       const loop = new Tone.Sequence((time, col) => {
+        console.log(col)
         that.currentCol = col;
         ['kick', 'snare', 'clap', 'hihatClosed', 'hihatOpen'].forEach((instr) => {
           if (that.sequence[instr] && that.sequence[instr][col]) keys.get(instr).start();
@@ -393,6 +402,7 @@
     min-height: 100vh;
     .instrument-container {
       position: relative;
+      z-index: 1;
       background-color: #5B5C5F;
       width: 800px;
       height: 600px;
@@ -424,6 +434,12 @@
         top: 10px;
         padding-right: 10px;
       }
+    }
+
+    .function-output {
+      position: absolute;
+      right: 0;
+      bottom: 13px;
     }
 
     .function-output:before {
@@ -483,6 +499,7 @@
     .charts-wrapper {
       display: flex;
       border: 1px solid #505155;
+      overflow: hidden;
     }
 
     .charts-formula-wrapper {
@@ -494,7 +511,10 @@
         flex: 1 1 100%;
         justify-content: space-between;
         padding: 15px;
-        color: #606165;
+        color: #919191;
+        &.active {
+          color: #606165;
+        }
       }
       .math {
         font-family: serif;
@@ -503,12 +523,20 @@
 
     .chart {
       padding-top: 40px;
+      padding-bottom: 10px;
       height: 200px;
       width: 400px;
       background-color: #A1A1A1;
       cursor: pointer;
+      .ct-series-a .ct-line {
+        stroke: #919191 !important;
+        stroke-width: 1px;
+      }
       &.active {
         background-color: #C5C5C5;
+        .ct-series-a .ct-line {
+          stroke: #606165 !important;
+        }
       }
     }
 
@@ -516,10 +544,6 @@
       border-right: 1px solid #505155;
     }
 
-    .ct-series-a .ct-line {
-      stroke: #606165 !important;
-      stroke-width: 1px;
-    }
 
     #chart-mini {
       width: 66px;
@@ -535,16 +559,17 @@
       width: 100%;
       background: transparent;
       outline: none;
+      z-index: 1;
     }
 
     input[type=range]::-webkit-slider-thumb {
       -webkit-appearance: none;
+      display: none;
       border: 1px solid #195D3B;
       height: 23px;
       width: 23px;
-
       border-radius: 50%;
-      background: #167544;
+      background-color: #167544;
       cursor: pointer;
       margin-top: -11px;
       box-shadow: 0px 5px 4px rgba(0, 0, 0, .2);
@@ -554,23 +579,38 @@
       cursor: pointer;
       margin: 0 5px 0 9px;
       padding: 0;
-      background: black;
-      border-bottom: 11px solid #5b5c5f;
-      border-top: 11px solid #5b5c5f;
+      background: #919191;
+      border-bottom: 11px solid;
+      border-top: 11px solid;
+      border-color: #A1A1A1;
       box-sizing: border-box;
       height: 23px;
     }
 
-    input[type=range]:focus::-webkit-slider-runnable-track {
+    input[type=range]:focus::-webkit-slider-runnable-track {}
+
+    .point-sliders-wrapper {
+      margin-top: -40px;
+      margin-bottom: 30px;
+      input[type=range].active::-webkit-slider-runnable-track {
+        border-color: #C5C5C5;
+        background-color: #606165;
+      }
+      input[type=range].active::-webkit-slider-thumb {
+        display: block;
+      }
     }
 
     .pointers-wrapper {
       pointer-events: none;
       .pointer-wrapper {
         position: relative;
+        &:last-child {
+          margin-left: 2px;
+        }
         .pointer {
           position: absolute;
-          height: 200px;
+          height: 180px;
           width: 1px;
           background: rgba(#48494F, .3);
           top: -200px;
@@ -589,7 +629,7 @@
       div {
         text-align: left;
         border-right: 1px solid #AEAEAF;
-        line-height: 38px;
+        line-height: 39px;
         padding: 0 10px;
         font-size: 12px;
         color: #595A5D;
@@ -653,25 +693,61 @@
       box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
       cursor: pointer;
       text-align: left;
-      background-color: #F9C02C;
-      background: linear-gradient(to bottom, #BB9022, #F9C02C);
+      background-color: #219653;
+      background: linear-gradient(to bottom, #166236, #219653);
+      &:after {
+        content: '';
+        position: absolute;
+        width: 73px;
+        height: 29px;
+        background-image: url("../assets/print-button-label.png");
+        background-size: cover;
+        bottom: -37px;
+        right: -48px;
+      }
     }
 
     .print-decoration {
       position: absolute;
-      bottom: -50px;
-      right: 275px;
+      bottom: 0;
+      top: 0;
+      z-index: 0;
+      left: 0;
+      right: 0;
+      margin: auto;
+      padding-top: 478px;
       width: 230px;
+      height: 182px;
       border-radius: 0 0 5px 5px;
-      border: 0;
       outline: none;
       color: white;
-      height: 50px;
+      -webkit-box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
       box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
       cursor: pointer;
       text-align: left;
-      background-color: white;
-      background: linear-gradient(to bottom, #BBB, white, white, white);
+      background-color: transparent;
+      background-image: url("../assets/print-decoration.png");
+      background-size: 230px;
+      background-position: bottom;
+      background-repeat: no-repeat;
+      animation: print-decoration-peek 10s infinite;
+    }
+
+    @keyframes print-decoration-peek {
+      0% { transform: translateX(200px) translateY(0px) }
+      94% { transform: translateX(200px) translateY(0px) }
+      98% { transform: translateX(200px) translateY(20px) }
+      100% { transform: translateX(200px) translateY(0px) }
+    }
+
+    .speaker-decoration {
+      position: absolute;
+      height: 56px;
+      width: 80px;
+      left: 22px;
+      bottom: 22px;
+      background-image: url("../assets/speaker.png");
+      background-size: cover;
     }
 
     .nav-button {
