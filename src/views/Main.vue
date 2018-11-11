@@ -1,7 +1,9 @@
 <template>
   <div class="instrument-wrapper">
     <div class="instrument-container">
+      <div class="plug"><img src="../assets/plug.png" alt=""></div>
       <div class="function-input">{{startingPoint}}</div>
+      <div class="label">sekvenca.ostatka</div>
       <hr>
       <div class="keys">
         <button
@@ -400,12 +402,13 @@
     background-size: cover;
     background-position: 50%;
     min-height: 100vh;
+    overflow: hidden;
     .instrument-container {
       position: relative;
       z-index: 1;
       background-color: #5B5C5F;
       width: 800px;
-      height: 600px;
+      height: 570px;
       margin: 10px auto 60px;
       color: #A8ABA5;
       border-radius: 5px;
@@ -450,6 +453,27 @@
       content: 'input'
     }
 
+    .label {
+      position: absolute;
+      top: 50px;
+      left: 20px;
+      font-size: 20px;
+      color: #363739;
+      font-weight: 300;
+    }
+
+    .plug {
+      position: absolute;
+      top: 0;
+      right: 0;
+      img {
+        position: absolute;
+        top: -80px;
+        left: 0;
+        height: 216px;
+      }
+    }
+
     hr {
       border: 0;
       border-bottom: 1px solid #505155;
@@ -490,7 +514,7 @@
     }
 
     .navigation {
-      padding: 15px 10px 22px;
+      padding: 10px 10px 17px;
       justify-content: space-between;
       display: flex;
       align-items: center;
@@ -643,7 +667,7 @@
         flex: 1 1 auto;
         border-right: 1px solid #AEAEAF;
         display: inline-block;
-        height: 38px;
+        height: 39px;
       }
       span.active {
         background-color: #D7D7D7;
@@ -715,7 +739,7 @@
       left: 0;
       right: 0;
       margin: auto;
-      padding-top: 478px;
+      padding-top: 448px;
       width: 230px;
       height: 182px;
       border-radius: 0 0 5px 5px;
@@ -751,7 +775,7 @@
     }
 
     .nav-button {
-      padding: 5px;
+      padding: 7px 5px;
       display: inline-block;
       border-radius: 5px;
       text-align: center;
@@ -784,6 +808,7 @@
 
       .subtitle {
         margin-top: 3px;
+        display: none;
       }
 
       .mini-sequence {
