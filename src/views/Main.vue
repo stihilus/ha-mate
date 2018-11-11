@@ -334,7 +334,7 @@
       },
       print() {
         const printWindow = window.open(
-          '/#/print/' + this.startingPoint + '/' + (this.selectedChart === 'left' ? 1.7 : 3.78) + '/' + (this.selectedChart === 'left' ? this.pointLeft : this.pointRight),
+          'http://127.0.0.1:' + window.location.port + '/#/print/' + this.startingPoint + '/' + (this.selectedChart === 'left' ? 1.7 : 3.78) + '/' + (this.selectedChart === 'left' ? this.pointLeft : this.pointRight),
           'Print your composition',
           'left=0,top=0,toolbar=0,scrollbars=0,status=0'
         );
@@ -371,7 +371,6 @@
 
       Tone.Transport.start();
       const loop = new Tone.Sequence((time, col) => {
-        console.log(col)
         that.currentCol = col;
         ['kick', 'snare', 'clap', 'hihatClosed', 'hihatOpen'].forEach((instr) => {
           if (that.sequence[instr] && that.sequence[instr][col]) keys.get(instr).start();

@@ -80,8 +80,10 @@
     },
     mounted () {
       this.draw()
-      window.print()
-      window.close()
+      setTimeout(() => {
+        window.print()
+        window.close()
+      }, 100)
     },
   }
 </script>
