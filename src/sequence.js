@@ -53,8 +53,8 @@ export default (seed) => {
 
   const scale = scales[Math.floor(seed.substr(2, 1) / 2)].slice(0, 5);
   const octaves = [
-    1 + Math.floor(seed.substr(4, 1) / 5),
-    1 + Math.floor(seed.substr(5, 1) / 5),
+    3 + Math.floor(seed.substr(4, 1) / 5),
+    3 + Math.floor(seed.substr(5, 1) / 5),
   ];
   const synthSeq = {};
   for (let i = 0; i < 5; i++) {
@@ -82,6 +82,7 @@ export default (seed) => {
     hihatOpen,
     synthSeq,
     scale,
+    octaves,
     bassSeq,
   };
 };

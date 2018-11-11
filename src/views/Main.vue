@@ -90,10 +90,10 @@
         </div>
         <div class="flex pointers-wrapper">
           <div class="pointer-wrapper">
-            <div class="pointer" v-bind:style="{ left: (7.75 * pointLeft) + 11 + 'px' }"></div>
+            <div class="pointer" v-bind:style="{ left: (7.33 * pointLeft) + 21 + 'px' }"></div>
           </div>
           <div class="pointer-wrapper">
-            <div class="pointer" v-bind:style="{ left: (7.75 * pointRight) + 11 + 'px' }"></div>
+            <div class="pointer" v-bind:style="{ left: (7.33 * pointRight) + 21 + 'px' }"></div>
           </div>
         </div>
         <div class="flex">
@@ -207,7 +207,7 @@
     height: 200,
     width: 400,
     showPoint: false,
-    chartPadding: 10,
+    chartPadding: 20,
     fullWidth: true,
     axisX: {
       offset: 0,
@@ -367,7 +367,7 @@
         });
         const melodyNotes = [];
         that.sequence.scale.forEach((note) => {
-          if (that.sequence.synthSeq[note] && that.sequence.synthSeq[note][col]) melodyNotes.push(note + "3");
+          if (that.sequence.synthSeq[note] && that.sequence.synthSeq[note][col]) melodyNotes.push(note + that.sequence.octaves[col % 2]);
         });
         synth.triggerAttackRelease(melodyNotes, "16n");
         that.sequence.scale.forEach((note) => {
@@ -528,6 +528,40 @@
         stroke: white !important;
         stroke-width: 1px;
       }
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: transparent;
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      border: 1px solid #195D3B;
+      height: 23px;
+      width: 23px;
+
+      border-radius: 50%;
+      background: #167544;
+      cursor: pointer;
+      margin-top: -11px;
+      box-shadow: 0px 5px 4px rgba(0, 0, 0, .2);
+    }
+
+    input[type=range]::-webkit-slider-runnable-track {
+      cursor: pointer;
+      margin: 0 5px 0 9px;
+      padding: 0;
+      background: black;
+      border-bottom: 11px solid #5b5c5f;
+      border-top: 11px solid #5b5c5f;
+      box-sizing: border-box;
+      height: 23px;
+    }
+
+    input[type=range]:focus::-webkit-slider-runnable-track {
     }
 
     .pointers-wrapper {
