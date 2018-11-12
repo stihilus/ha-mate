@@ -38,7 +38,7 @@
             </div>
             <div class="subtitle">Drums</div>
           </div>
-          <div class="nav-button melody" @click="show('melody')">
+          <div class="nav-button" :class="{ melody: final.substr(3, 1) < 8 }" @click="show('melody')">
             <div class="mini-sequence" v-for="note in sequence.scale" :key="note">
                       <span
                         v-for="i in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]"
@@ -49,7 +49,7 @@
             </div>
             <div class="subtitle">Melody</div>
           </div>
-          <div class="nav-button melody" @click="show('bass')">
+          <div class="nav-button" :class="{ melody: final.substr(4, 1) < 8 }" @click="show('bass')">
             <div class="mini-sequence" v-for="note in sequence.scale" :key="note">
                       <span
                         v-for="i in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]"
@@ -146,7 +146,7 @@
             Skala
           </div>
         </div>
-        <div class="sequence melody" v-for="note in sequence.scale" :key="note">
+        <div class="sequence" :class="{ melody: final.substr(3, 1) < 8 }" v-for="note in sequence.scale" :key="note">
           <div>{{ note }}</div>
           <span
             v-for="i in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]"
@@ -173,7 +173,7 @@
             Skala
           </div>
         </div>
-        <div class="sequence melody" v-for="note in sequence.scale" :key="note">
+        <div class="sequence" :class="{ melody: final.substr(4, 1) < 8 }" v-for="note in sequence.scale" :key="note">
           <div>{{ note }}</div>
           <span
             v-for="i in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]"
@@ -247,7 +247,7 @@
   export default {
     data: () => ({
       startingPoint: '0.' + (new Date()).getHours() + '' + (new Date()).getMinutes(),
-      pointLeft: 49,
+      pointLeft: 25,
       pointRight: 17,
       pointsLeft: [],
       pointsRight: [],
@@ -341,18 +341,19 @@
         printWindow.focus();
       }
     },
-    mounted() {
+    async mounted() {
       this.draw();
-      const keys = new Tone.Players({
-        kick: '/sounds/kick.wav',
-        snare: '/sounds/snare.wav',
-        clap: '/sounds/clap.wav',
-        hihatClosed: '/sounds/hihat-closed.wav',
-        hihatOpen: '/sounds/hihat-open.wav',
-      }, {
-        "volume" : -20,
-        // "fadeOut" : "64n",
-      }).toMaster();
+      let keys
+      await new Promise((res) => {
+        keys = new Tone.Players({
+          kick: '/sounds/kick.wav',
+          snare: '/sounds/snare.wav',
+          clap: '/sounds/clap.wav',
+          hihatClosed: '/sounds/hihat-closed.wav',
+          hihatOpen: '/sounds/hihat-open.wav',
+        }, res).toMaster();
+      })
+      keys.volume.rampTo(-10)
 
       const synth = new Tone.PolySynth(5, Tone.Synth).toMaster();
 
@@ -376,13 +377,19 @@
           if (that.sequence[instr] && that.sequence[instr][col]) keys.get(instr).start();
         });
         const melodyNotes = [];
-        that.sequence.scale.forEach((note) => {
-          if (that.sequence.synthSeq[note] && that.sequence.synthSeq[note][col]) melodyNotes.push(note + that.sequence.octaves[col % 2]);
-        });
-        synth.triggerAttackRelease(melodyNotes, "16n");
-        that.sequence.scale.forEach((note) => {
-          if (that.sequence.bassSeq[note] && that.sequence.bassSeq[note][col]) bass.triggerAttackRelease(note + "2", "4n");
-        });
+        if (this.final.substr(3, 1) < 8) {
+          that.sequence.scale.forEach((note) => {
+            if (that.sequence.synthSeq[note] && that.sequence.synthSeq[note][col])
+              melodyNotes.push(note + that.sequence.octaves[col % 2]);
+          });
+          synth.triggerAttackRelease(melodyNotes, "16n");
+        }
+        if (this.final.substr(4, 1) < 8) {
+          that.sequence.scale.forEach((note) => {
+            if (that.sequence.bassSeq[note] && that.sequence.bassSeq[note][col])
+              bass.triggerAttackRelease(note + "2", "4n");
+          });
+        }
       }, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], '16n');
 
       loop.start();
@@ -529,6 +536,7 @@
       display: flex;
       position: absolute;
       width: 100%;
+      pointer-events: none;
       > div {
         display: flex;
         flex: 1 1 100%;
@@ -671,6 +679,12 @@
       span.active {
         background-color: #D7D7D7;
       }
+      span.filled {
+        background-color: #555;
+        &.active {
+          background-color: #777;
+        }
+      }
       &.drums span.filled {
         background-color: #EEB72A;
         &.active {
@@ -782,7 +796,7 @@
       font-size: 10px;
       text-transform: lowercase;
       margin: 0 9px;
-      border: 1px solid;
+      border: 1px solid #555;
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
       position: relative;
       &:hover {
