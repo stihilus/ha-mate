@@ -1,5 +1,7 @@
 # Sekvenca ostatka
 
+_Izložba art+science+makers 2018_
+
 [![Sekvenca ostataka uživo](http://img.youtube.com/vi/NuzNZmKnBGk/0.jpg)](http://www.youtube.com/watch?v=NuzNZmKnBGk)
 
 Matematički haos se može istražiti na vrlo kreativan način. Potrebno je odabrati broj između 0 i 1, a instalacija će pomoću iterativne nelinearne dinamičke funkcije poznatije kao „logistička mapa“ dati određeni rezultat u vidu haosa. Dobijeni rezultat će postati „seme“ u algoritmu koji će od njega stvoriti muziku i vizualizaciju. Pri promenama vrednosti parametara mape muzika se menja kroz predvidive i nepredvidive šablone, a zvuk koji nas nosi kroz matematiku uređenosti i haosa možda će otvoriti vrata ka jednoj novoj i neobičnoj grani matematike.
